@@ -1,0 +1,8 @@
+.wp-block-christianp-interactive-element {
+    padding: 1em 2em;
+    background: hsl(280,0%,90%);
+    border-radius: 0.2em;
+}
+.wp-block-christianp-interactive-element textarea[name="params"] {
+    font-family: monospace;
+}

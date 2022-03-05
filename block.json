@@ -1,0 +1,10 @@
+{
+    "apiVersion": 2,
+    "name": "christianp/interactive-element",
+    "title": "Interactive element",
+    "icon": "universal-access-alt",
+    "category": "layout",
+    "editorScript": "file:./block.js",
+    "editorStyle": "file:./editor.css",
+    "style": "file:./style.css"
+}
