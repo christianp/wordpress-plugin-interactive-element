@@ -12,32 +12,60 @@
         if(scripts_loaded[item]) {
             return scripts_loaded[item];
         }
-        const script = document.createElement('script');
-        const item_url = `${settings.wp_content_url}/interactive-elements/${item}/`;
-        const promise = new Promise((resolve,reject) => {
-            script.onload = e => {
-                resolve({
-                    item_url: item_url
+        const item_url = `${settings.wp_content_url}/interactive-elements/${item}`;
+        const promise = fetch(`${item_url}/info.json`).then(r => r.json()).then(json => {
+            let promise = Promise.resolve(Object.assign({item_url}, json));
+            if(json.template) {
+                promise = promise.then(out => {
+                    return fetch(`${item_url}/${json.template}`).then(r => r.text()).then(text => { out.template = text; return out; });
                 });
             }
+            if(json.script) {
+                promise = promise.then(out => {
+                    const script = document.createElement('script');
+                    script.setAttribute('type','module');
+                    script.setAttribute('src', `${item_url}/${json.script}`);
+                    const {promise, resolve} = Promise.withResolvers();
+                    const sc = Promise.withResolvers();
+                    script.onload = () => {
+                        sc.resolve(out);
+                    }
+                    document.head.appendChild(script);
+                    return sc.promise;
+                });
+            }
+            return promise;
         });
-        scripts_loaded[item] = promise;
-        script.setAttribute('src', `${item_url}element.js`);
-        document.head.appendChild(script);
         return promise;
     }
 
 class InteractiveElement extends HTMLElement {
     constructor() {
         super();
-        this.shadow = this.attachShadow({mode: 'open'});
     }
     connectedCallback() {
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
+    }
+    init() {
         const item = this.getAttribute('data-item');
-        const params = this.getAttribute('data-params');
+        const params = this.querySelector('script[type="params"]').textContent;
+        this.shadow = this.attachShadow({mode: 'open'});
         const container = document.createElement('div');
         this.shadow.appendChild(container);
         load_script(item).then(data => {
+            if(data.template) {
+                container.innerHTML = data.template;
+            }
+            if(data.css) {
+                const link = document.createElement('link');
+                link.setAttribute('rel','stylesheet');
+                link.setAttribute('href',`${data.item_url}/${data.css}`);
+                container.append(link);
+            }
             script_inits[item](container, params, data);
         });
     }

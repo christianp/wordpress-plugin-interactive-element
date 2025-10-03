@@ -54,9 +54,11 @@
                 el(
                     'interactive-element', 
                     {
-                        'data-item': props.attributes.item,
-                        'data-params': props.attributes.params
-                    }
+                        'data-item': props.attributes.item
+                    },
+                    [
+                        el('script', {'type':'params'}, props.attributes.params)
+                    ]
                 )
             );
         },

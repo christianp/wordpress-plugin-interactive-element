@@ -146,7 +146,7 @@ class InteractiveElement {
             if(!is_dir($dir) || str_starts_with($name,'.')) {
                 continue;
             }
-            $info = json_decode(file_get_contents("${dir}/info.json"));
+            $info = json_decode(file_get_contents("{$dir}/info.json"));
             $elements[$name] = $info;
         }
         return $elements;
